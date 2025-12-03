@@ -24,6 +24,8 @@ pkgs.mkShell {
   ];
 
   shellHook = ''
+    export DEVENV_DIR="$PWD"
+
     mkdir -p "$DEVENV_DIR/data"
     mkdir -p "$DEVENV_DIR/state"
 
@@ -36,10 +38,6 @@ pkgs.mkShell {
     alias tmux="tmux -f $TMUX_CONF"
 
     export SHELL=${pkgs.zsh}/bin/zsh
-
-    echo "Configurations loaded from: $DEVENV_DIR/config"
-    echo "Data stored in: $DEVENV_DIR/data"
-    echo ""
 
     if [ -z "$ZSH_VERSION" ]; then
       exec ${pkgs.zsh}/bin/zsh
