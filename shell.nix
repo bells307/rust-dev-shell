@@ -21,7 +21,6 @@ pkgs.mkShell {
     nil
     taplo
     curl
-    claude-code
   ];
 
   shellHook = ''
