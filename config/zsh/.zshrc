@@ -16,11 +16,8 @@ setopt AUTO_PUSHD              # Push directories onto stack
 setopt PUSHD_IGNORE_DUPS       # Don't push duplicates
 setopt PUSHD_SILENT            # Don't print directory stack
 
-# Completion system
 autoload -Uz compinit
-# Use a separate compdump file to avoid conflicts
 compinit -d "$XDG_STATE_HOME/.zcompdump"
-# Rebuild completion cache if older than 24 hours
 if [[ -n "$XDG_STATE_HOME/.zcompdump"(#qN.mh+24) ]]; then
   compinit -d "$XDG_STATE_HOME/.zcompdump"
 else
@@ -32,10 +29,10 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'        # Case-insensitive
 zstyle ':completion:*' list-colors ''                       # Colored completion
 zstyle ':completion:*' verbose yes
 zstyle ':completion:*:descriptions' format '%B%d%b'
-# Prevent errors in completion functions
 zstyle ':completion:*' completer _complete _ignored
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path "$XDG_STATE_HOME/.zcompcache"
+setopt NO_NOMATCH              # Don't error on no glob matches
 setopt COMPLETE_IN_WORD        # Complete from cursor position
 setopt ALWAYS_TO_END           # Move cursor after completion
 
