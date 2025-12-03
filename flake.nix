@@ -44,9 +44,9 @@
                   selectedLineBgColor:
                     - blue
               git:
-                paging:
-                  colorArg: always
-                  pager: delta --dark --paging=never
+                pagers:
+                  diff: delta --dark --paging=never
+                  log: delta --dark --paging=never
               EOF
             '')
           ];
