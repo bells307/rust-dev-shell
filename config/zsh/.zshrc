@@ -16,23 +16,13 @@ setopt AUTO_PUSHD              # Push directories onto stack
 setopt PUSHD_IGNORE_DUPS       # Don't push duplicates
 setopt PUSHD_SILENT            # Don't print directory stack
 
-autoload -Uz compinit
-compinit -d "$XDG_STATE_HOME/.zcompdump"
-if [[ -n "$XDG_STATE_HOME/.zcompdump"(#qN.mh+24) ]]; then
-  compinit -d "$XDG_STATE_HOME/.zcompdump"
-else
-  compinit -C -d "$XDG_STATE_HOME/.zcompdump"
-fi
-
+# Completion system
+autoload -Uz compinit && compinit
 zstyle ':completion:*' menu select                          # Interactive menu
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'        # Case-insensitive
 zstyle ':completion:*' list-colors ''                       # Colored completion
 zstyle ':completion:*' verbose yes
 zstyle ':completion:*:descriptions' format '%B%d%b'
-zstyle ':completion:*' completer _complete _ignored
-zstyle ':completion:*' use-cache on
-zstyle ':completion:*' cache-path "$XDG_STATE_HOME/.zcompcache"
-setopt NO_NOMATCH              # Don't error on no glob matches
 setopt COMPLETE_IN_WORD        # Complete from cursor position
 setopt ALWAYS_TO_END           # Move cursor after completion
 
