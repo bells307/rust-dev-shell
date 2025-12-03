@@ -15,10 +15,42 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        # Пути к конфигурациям из nix-home
-        nvimConfig = "${nix-home}/nvim";
-        tmuxConfig = "${nix-home}/tmux";
-        zshConfig = "${nix-home}/zsh";
+        devConfigs = pkgs.buildEnv {
+          name = "dev-configs";
+          paths = [
+            (pkgs.runCommand "nvim-config" {} ''
+              mkdir -p $out/nvim
+              cp -r ${nix-home}/nvim/nvim/* $out/nvim/
+            '')
+            (pkgs.runCommand "tmux-config" {} ''
+              mkdir -p $out/tmux
+              cp ${nix-home}/tmux/tmux.conf $out/tmux/
+            '')
+            (pkgs.runCommand "zsh-config" {} ''
+              mkdir -p $out/zsh
+              cp ${nix-home}/zsh/zshrc $out/zsh/.zshrc
+            '')
+            (pkgs.runCommand "lazygit-config" {} ''
+              mkdir -p $out/lazygit
+              cat > $out/lazygit/config.yml << 'EOF'
+              gui:
+                theme:
+                  lightTheme: false
+                  activeBorderColor:
+                    - green
+                    - bold
+                  inactiveBorderColor:
+                    - white
+                  selectedLineBgColor:
+                    - blue
+              git:
+                paging:
+                  colorArg: always
+                  pager: delta --dark --paging=never
+              EOF
+            '')
+          ];
+        };
       in
       {
         devShells.default = pkgs.mkShell {
@@ -42,6 +74,7 @@
             nil
             taplo
             curl
+            yazi
           ];
 
           shellHook = ''
@@ -49,23 +82,14 @@
 
             mkdir -p "$DEVENV_DIR/data"
             mkdir -p "$DEVENV_DIR/state"
-            mkdir -p "$DEVENV_DIR/config"
 
-            export XDG_CONFIG_HOME="$DEVENV_DIR/config"
+            # Используем конфигурации из nix store напрямую
+            export XDG_CONFIG_HOME="${devConfigs}"
             export XDG_DATA_HOME="$DEVENV_DIR/data"
             export XDG_STATE_HOME="$DEVENV_DIR/state"
-            export ZDOTDIR="$DEVENV_DIR/config/zsh"
+            export ZDOTDIR="${devConfigs}/zsh"
 
-            # Копируем конфигурации из nix-home, если их ещё нет
-            if [ ! -e "$XDG_CONFIG_HOME/.configs-initialized" ]; then
-              echo "Initializing configs from nix-home..."
-              cp -rL ${nvimConfig} "$XDG_CONFIG_HOME/"
-              cp -rL ${tmuxConfig} "$XDG_CONFIG_HOME/"
-              cp -rL ${zshConfig} "$XDG_CONFIG_HOME/"
-              touch "$XDG_CONFIG_HOME/.configs-initialized"
-            fi
-
-            export TMUX_CONF="$DEVENV_DIR/config/tmux/tmux.conf"
+            export TMUX_CONF="${devConfigs}/tmux/tmux.conf"
             alias tmux="tmux -f $TMUX_CONF"
 
             export SHELL=${pkgs.zsh}/bin/zsh
