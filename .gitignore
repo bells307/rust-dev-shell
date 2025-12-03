@@ -1,6 +1,4 @@
-# Neovim plugins and data
 data/
 state/
-
-# OS specific
+.direnv/
 .DS_Store
