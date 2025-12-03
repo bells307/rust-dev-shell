@@ -4,12 +4,21 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    nix-home = {
+      url = "github:bells307/nix-home";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, nix-home }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+
+        # Пути к конфигурациям из nix-home
+        nvimConfig = "${nix-home}/nvim";
+        tmuxConfig = "${nix-home}/tmux";
+        zshConfig = "${nix-home}/zsh";
       in
       {
         devShells.default = pkgs.mkShell {
@@ -40,11 +49,21 @@
 
             mkdir -p "$DEVENV_DIR/data"
             mkdir -p "$DEVENV_DIR/state"
+            mkdir -p "$DEVENV_DIR/config"
 
             export XDG_CONFIG_HOME="$DEVENV_DIR/config"
             export XDG_DATA_HOME="$DEVENV_DIR/data"
             export XDG_STATE_HOME="$DEVENV_DIR/state"
             export ZDOTDIR="$DEVENV_DIR/config/zsh"
+
+            # Копируем конфигурации из nix-home, если их ещё нет
+            if [ ! -e "$XDG_CONFIG_HOME/.configs-initialized" ]; then
+              echo "Initializing configs from nix-home..."
+              cp -rL ${nvimConfig} "$XDG_CONFIG_HOME/"
+              cp -rL ${tmuxConfig} "$XDG_CONFIG_HOME/"
+              cp -rL ${zshConfig} "$XDG_CONFIG_HOME/"
+              touch "$XDG_CONFIG_HOME/.configs-initialized"
+            fi
 
             export TMUX_CONF="$DEVENV_DIR/config/tmux/tmux.conf"
             alias tmux="tmux -f $TMUX_CONF"
